@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".ui.home.HomeFragment">
+
+    <SeekBar
+        android:id="@+id/SGSeekBar"
+        android:layout_width="272dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="268dp"
+        android:indeterminate="false"
+        android:max="100"
+        android:progress="50"
+        android:rotation="-90"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.992"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/msgWindow" />
+
+    <SeekBar
+        android:id="@+id/throttleSeekBar"
+        android:layout_width="272dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="176dp"
+        android:max="100"
+        android:progress="0"
+        android:rotation="-90"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.496"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/msgWindow" />
+
+    <Button
+        android:id="@+id/throttlePlusBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="132dp"
+        android:autoSizeTextType="uniform"
+        android:text="+"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <SeekBar
+        android:id="@+id/FSSeekBar"
+        android:layout_width="272dp"
+        android:layout_height="43dp"
+        android:layout_marginTop="268dp"
+        android:max="100"
+        android:progress="50"
+        android:rotation="-90"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/msgWindow" />
+
+    <TextView
+        android:id="@+id/msgWindow"
+        android:layout_width="199dp"
+        android:layout_height="37dp"
+        android:layout_marginTop="24dp"
+        android:autoSizeTextType="uniform"
+        android:ellipsize="start"
+        android:text="Not Connected"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/throttleMinusBtn"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginBottom="132dp"
+        android:autoSizeTextType="uniform"
+        android:text="-"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
