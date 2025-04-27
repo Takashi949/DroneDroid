@@ -18,7 +18,9 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.dronedroid.R;
 import com.example.dronedroid.databinding.FragmentHomeBinding;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class HomeFragment extends Fragment {
     private FragmentHomeBinding binding;
@@ -60,23 +62,19 @@ public class HomeFragment extends Fragment {
         final SeekBar.OnSeekBarChangeListener onSeekChange = new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                ArrayList<Float> u = new ArrayList<>(5);
+                Log.i("HomeFragment", "onValueChang");
                 if (seekBar.getId() == R.id.throttleSeekBar){
-                    Log.i("HomeFragment", "onValueChang");
-                    //ViewModelの値を更新
-                    u.set(0, (float)progress);
+                    homeViewModel.obj_chnged_item = 0;
                 }
                 else if (seekBar.getId() == R.id.SGSeekBar){
-                    Log.i("HomeFragment", "onValueChang");
-                    //ViewModelの値を更新
-                    u.set(1, (float)progress);
+                    homeViewModel.obj_chnged_item = 1;
                 }
                 else if (seekBar.getId() == R.id.FSSeekBar){
-                    Log.i("HomeFragment", "onValueChang");
-                    u.set(2, (float)progress);
+                    homeViewModel.obj_chnged_item = 2;
                 }
-
-                homeViewModel.getControl().postValue(u);
+                ArrayList<Float> old_obj = homeViewModel.getObjective_values().getValue();
+                old_obj.set(homeViewModel.obj_chnged_item, (float)progress);
+                homeViewModel.getObjective_values().setValue(old_obj);
             }
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {}

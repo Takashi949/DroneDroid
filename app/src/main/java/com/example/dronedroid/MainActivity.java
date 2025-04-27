@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import android.view.Menu;
@@ -37,6 +38,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -115,13 +117,21 @@ public class MainActivity extends AppCompatActivity {
         connectedThread = new ConnectedThread(btHandler);
 
         //CT, CU1, CU2, CU3, CU4, BC, EC,
-        homeViewModel.getControl().observeForever(new Observer<ArrayList<Float>>(){
+        homeViewModel.getObjective_values().observeForever(new Observer<ArrayList<Float>>(){
             @Override
-            public void onChanged(ArrayList<Float> u) {
-                for(int i = 0; i < 5; i++){
-                    byte[] msg = {(byte)i, u.get(i).byteValue(), '\0'};
-                    Log.i("D", "Send command " + new String(msg));
-                    if(isConnected)connectedThread.write(msg);
+            public void onChanged(ArrayList<Float> z) {
+                Log.i("Obj changed", z.toString());
+                byte[] msg = new byte[5];
+                msg[0] = homeViewModel.obj_chnged_item;
+                for(int k = 0; k < 4; k++){
+                    msg[k + 1] = ByteBuffer
+                            .allocate(4)
+                            .putFloat(z.get(homeViewModel.obj_chnged_item)).array()[k];
+                }
+
+                Log.i("Send Command", homeViewModel.obj_chnged_item + " " + z.get(homeViewModel.obj_chnged_item));
+                if(isConnected){
+                    connectedThread.write(msg);
                 }
             }
         });
@@ -213,6 +223,16 @@ public class MainActivity extends AppCompatActivity {
         isConnected = true;
         invalidateOptionsMenu();
     }
+    private float readFloatEndianCorrected(DataInputStream dis) throws IOException {
+        byte[] bytes = new byte[4];
+        dis.readFully(bytes); // 4バイト読み取る
+        // ビッグエンディアン → リトルエンディアン変換
+        int intBits = (bytes[0] & 0xFF) << 24 |
+                (bytes[1] & 0xFF) << 16 |
+                (bytes[2] & 0xFF) << 8 |
+                (bytes[3] & 0xFF);
+        return Float.intBitsToFloat(intBits);
+    }
 
     private void MessageParser(byte[] msgText) throws IOException {
         if(Character.valueOf((char)msgText[0]).equals('t')){
@@ -225,16 +245,26 @@ public class MainActivity extends AppCompatActivity {
             DataInputStream msgIS = new DataInputStream(new ByteArrayInputStream(msgText));
 
             ArrayList<Float> msgFloats = new ArrayList<>();
-            try {
-                while (true) msgFloats.add(msgIS.readFloat());
-            } catch (EOFException e) {
+            // ByteBufferをリトルエンディアンで作成（ESP32の場合リトルエンディアンが標準）
+            ByteBuffer buffer = ByteBuffer.wrap(msgText).order(java.nio.ByteOrder.LITTLE_ENDIAN);
+
+            // byte配列サイズの4バイト単位でfloat配列を作成
+            int floatCount = 18;
+            float[] floatArray = new float[floatCount];
+
+            // floatを1つずつ読み込む
+            for (int i = 0; i < floatCount; i++) {
+                floatArray[i] = buffer.getFloat();
+                msgFloats.add(floatArray[i]);
             }
 
-            homeViewModel.getPitchRollYaw().setValue((ArrayList<Float>) msgFloats.subList(0, 3));
-            homeViewModel.getPosition().setValue((ArrayList<Float>) msgFloats.subList(3, 6));
-            homeViewModel.getVelocity().setValue((ArrayList<Float>) msgFloats.subList(6, 9));
-            homeViewModel.getAccel().setValue((ArrayList<Float>) msgFloats.subList(9, 12));
-            homeViewModel.getControl().setValue((ArrayList<Float>) msgFloats.subList(12, 17));
+            Log.d("Receive Telem Parser", msgFloats.toString());
+            homeViewModel.getThrottleText().setValue(String.valueOf(msgFloats.get(0)));
+            homeViewModel.getPitchRollYaw().setValue(new ArrayList<Float>(msgFloats.subList(1, 4)));
+            homeViewModel.getPosition().setValue(new ArrayList<Float>(msgFloats.subList(4, 7)));
+            homeViewModel.getVelocity().setValue(new ArrayList<Float>(msgFloats.subList(7, 10)));
+            homeViewModel.getAccel().setValue(new ArrayList<Float>(msgFloats.subList(10, 13)));
+            homeViewModel.getControl().setValue(new ArrayList<Float>(msgFloats.subList(13, 18)));
         }
     }
 }
